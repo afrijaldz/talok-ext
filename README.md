@@ -13,6 +13,8 @@ repos full of study notes or docs that are meant to be read in order.
   (`EVM 01 - …`, folder `EVM 01 - Detail`) are sorted the way you'd read them; README always comes first.
 - **Remembers progress** — reopens the last file at its scroll position; files read to the bottom
   get a ✓ in the file list.
+- **Reading history** — the start page lists recently opened repos with the last file and how many
+  files you've read. Click the repo name at the bottom of the file list to get back there.
 - **Links between files** in markdown stay inside the reader, including links to headings.
 - **Syntax highlighting** for common languages plus Solidity and Yul.
 - YAML frontmatter is hidden, dotfiles (`.github`, `.gitignore`) are not listed.
@@ -51,6 +53,32 @@ Clicking the icon on any non-GitHub page opens a form where you can enter `owner
 
 Cmd/Ctrl+click on a file opens it in a new tab.
 
+## Web version
+
+The same reader also runs as a static website, without the extension and without a backend: the
+browser fetches straight from GitHub, which allows cross-origin requests.
+
+```sh
+./build-web.sh   # writes dist/
+```
+
+Deploy `dist/` to any static host that serves `index.html` for unknown paths. `wrangler.jsonc`
+deploys it to Cloudflare Workers as static assets in single-page-application mode, on the custom
+domain `reader.afrijal.dev` (change `name` and `routes` for your own):
+
+```sh
+./build-web.sh && npx wrangler deploy
+```
+
+URLs mirror GitHub: replace `github.com` with the site's host, e.g.
+`https://reader.example.com/owner/repo/blob/main/README.md`. Public repos need no login; for
+private repos, click **Token** at the bottom of the file list. On the web the token is kept in the
+site's `localStorage`.
+
+The web version is also a PWA: install it from the browser ("Install app" / "Add to Home Screen").
+The app itself works offline, and files you've already opened stay readable offline. Once installed
+on Android, sharing a GitHub link to Reader opens that repo in the reader.
+
 ## GitHub token (optional)
 
 Without a token the reader uses GitHub's public API: one request per repo for the file list (cached
@@ -69,6 +97,9 @@ manifest.json        Manifest V3
 background.js        Icon click → turn the github.com URL into a reader URL
 reader.html/css/js   Reader page (file list, rendering, split view, routing)
 options.html/js      Token settings
+build-web.sh         Builds the web version into dist/
+web/                 Web-only files: service worker, web app manifest, icons
+wrangler.jsonc       Cloudflare deploy config for the web version
 vendor/              marked, DOMPurify, highlight.js, highlightjs-solidity
 ```
 

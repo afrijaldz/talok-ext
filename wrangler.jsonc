@@ -1,0 +1,11 @@
+// Web version: dist/ (built by ./build-web.sh) served as static assets, no Worker code.
+{
+  "name": "talok-reader",
+  "compatibility_date": "2026-10-12",
+  "assets": {
+    "directory": "./dist",
+    // /owner/repo/... has no file of its own: serve index.html and let the reader route it.
+    "not_found_handling": "single-page-application"
+  },
+  "routes": [{ "pattern": "reader.afrijal.dev", "custom_domain": true }]
+}

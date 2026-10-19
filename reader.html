@@ -10,7 +10,7 @@
   <aside id="sidebar">
     <input id="filter" type="search" placeholder="Search files  /" autocomplete="off" spellcheck="false">
     <nav id="tree"></nav>
-    <div id="repo-name"></div>
+    <div id="side-foot"><a id="repo-name" title="Home: recently read repos"></a><button class="settings-btn web-only" title="GitHub token">Token</button></div>
   </aside>
 
   <main id="main"></main>
@@ -30,7 +30,12 @@
     <form id="open-form">
       <h1>Reader</h1>
       <input id="repo-input" placeholder="https://github.com/owner/repo or owner/repo" autocomplete="off" spellcheck="false" autofocus>
-      <p>Or open a repo on github.com, then click the extension icon / press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>.</p>
+      <p id="landing-hint">Or open a repo on github.com, then click the extension icon / press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>.</p>
+      <p class="web-only">Private repo? <button type="button" class="settings-btn link">Add a GitHub token</button></p>
+      <div id="recent" hidden>
+        <h2>Recently read</h2>
+        <ul id="recent-list"></ul>
+      </div>
     </form>
   </section>
 
@@ -48,6 +53,17 @@
       <dt><kbd>g</kbd></dt><dd>Open this file on GitHub</dd>
       <dt><kbd>?</kbd></dt><dd>This help</dd>
     </dl>
+  </dialog>
+
+  <dialog id="settings">
+    <form method="dialog">
+      <h2>GitHub token</h2>
+      <input id="token" type="password" placeholder="github_pat_…" autocomplete="off" spellcheck="false">
+      <p>Optional. Needed for private repos, or past the 60 requests/hour limit for anonymous access.
+         A fine-grained token with <em>Contents: read-only</em> permission is enough. It is stored in this
+         browser only and sent only to api.github.com.</p>
+      <div class="actions"><button value="save">Save</button><button value="cancel">Cancel</button></div>
+    </form>
   </dialog>
 
   <div id="toast" role="status"></div>

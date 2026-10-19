@@ -11,6 +11,9 @@ const MAX_TEXT_SIZE = 1024 * 1024;
 const NARROW = 820;
 const SPLIT_SEP = '::'; // separates left/right paths in the hash; ':' is always encoded inside a path
 const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+// The same page runs as the extension's reader.html and as a plain website (index.html).
+const IS_EXT = !!globalThis.chrome?.runtime?.id;
+const TOKEN_HINT = IS_EXT ? 'in the extension options' : 'under Token in the file list';
 
 const state = {
   owner: '', repo: '', ref: 'HEAD', token: '',
@@ -29,7 +32,60 @@ const store = {
     try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
   },
 };
-const repoKey = (k) => `${k}:${state.owner}/${state.repo}@${state.ref}`;
+const repoKey = (k, repo = `${state.owner}/${state.repo}`, ref = state.ref) => `${k}:${repo}@${ref}`;
+
+// ---------- recently opened repos (shown on the landing page) ----------
+const MAX_RECENT = 20;
+
+function rememberRepo() {
+  const repo = `${state.owner}/${state.repo}`;
+  const rest = store.get('recent', []).filter((r) => !(r.repo === repo && r.ref === state.ref));
+  store.set('recent', [{ repo, ref: state.ref, at: Date.now(), total: state.order.length }, ...rest].slice(0, MAX_RECENT));
+}
+
+function forgetRepo(repo, ref) {
+  store.set('recent', store.get('recent', []).filter((r) => !(r.repo === repo && r.ref === ref)));
+}
+
+const relTime = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+function ago(ms) {
+  const s = (ms - Date.now()) / 1000;
+  for (const [unit, n] of [['year', 31536000], ['month', 2592000], ['week', 604800], ['day', 86400], ['hour', 3600], ['minute', 60]]) {
+    if (Math.abs(s) >= n) return relTime.format(Math.round(s / n), unit);
+  }
+  return 'just now';
+}
+
+function renderRecent() {
+  const list = $('#recent-list');
+  const recent = store.get('recent', []);
+  $('#recent').hidden = !recent.length;
+  list.replaceChildren(...recent.map(({ repo, ref, at, total }) => {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = readerHref({ repo, ref: ref === 'HEAD' ? undefined : ref });
+
+    const name = document.createElement('span');
+    name.className = 'recent-name';
+    name.textContent = repo + (ref !== 'HEAD' ? ` @ ${ref}` : '');
+
+    const last = store.get(repoKey('last', repo, ref), null);
+    const read = Math.min(store.get(repoKey('done', repo, ref), []).length, total);
+    const meta = document.createElement('small');
+    meta.textContent = [last && title(last), total ? `${read}/${total} read` : '', ago(at)].filter(Boolean).join(' · ');
+
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'recent-remove';
+    remove.title = 'Remove from history';
+    remove.textContent = '×';
+    remove.addEventListener('click', () => { forgetRepo(repo, ref); renderRecent(); });
+
+    a.append(name, meta);
+    li.append(a, remove);
+    return li;
+  }));
+}
 
 // ---------- preferences ----------
 function applyPrefs() {
@@ -68,9 +124,30 @@ function parseRepoInput(text) {
 }
 
 function readerHref({ repo, ref, path }) {
+  const hash = path ? '#' + encPath(path) : '';
+  if (!IS_EXT) return `/${repo}` + (ref ? `?ref=${encodeURIComponent(ref)}` : '') + hash;
   const params = new URLSearchParams({ repo });
   if (ref) params.set('ref', ref);
-  return `reader.html?${params}` + (path ? '#' + encPath(path) : '');
+  return `reader.html?${params}` + hash;
+}
+
+// On the web the repo lives in the path, like on github.com: /owner/repo[/blob|tree/<ref>/<path>].
+// A GitHub-style URL is rewritten to /owner/repo?ref=<ref>#<path>, the form the reader uses.
+function webTarget() {
+  const [owner, repo, kind, ref, ...rest] = location.pathname.split('/').filter(Boolean).map(decode);
+  if (!repo) return null;
+  const target = { repo: `${owner}/${repo.replace(/\.git$/, '')}`, ref: new URLSearchParams(location.search).get('ref') };
+  if ((kind === 'blob' || kind === 'tree') && ref) {
+    const href = readerHref({ ...target, ref, path: rest.join('/') });
+    history.replaceState(null, '', location.hash ? href.replace(/#.*$/, '') + location.hash : href);
+    target.ref = ref;
+  }
+  return target;
+}
+
+async function loadToken() {
+  if (!IS_EXT) return store.get('token', '');
+  try { return (await chrome.storage.local.get('token')).token || ''; } catch { return ''; }
 }
 
 // ---------- github fetch ----------
@@ -83,13 +160,13 @@ async function gh(url, accept = 'application/vnd.github+json') {
   let msg = `GitHub responded with ${res.status}.`;
   if ((res.status === 403 || res.status === 429) && res.headers.get('x-ratelimit-remaining') === '0') {
     const reset = new Date(Number(res.headers.get('x-ratelimit-reset')) * 1000);
-    msg = `GitHub rate limit reached (resets at ${reset.toLocaleTimeString()}). Add a token in the extension options for a higher limit.`;
+    msg = `GitHub rate limit reached (resets at ${reset.toLocaleTimeString()}). Add a token ${TOKEN_HINT} for a higher limit.`;
   } else if (res.status === 404) {
     msg = state.token
       ? 'Not found. Check the repo / branch name, or the token permissions.'
-      : 'Not found. If the repo is private, add a token in the extension options.';
+      : `Not found. If the repo is private, add a token ${TOKEN_HINT}.`;
   } else if (res.status === 401) {
-    msg = 'GitHub rejected the token. Check it in the extension options.';
+    msg = `GitHub rejected the token. Check it ${TOKEN_HINT}.`;
   }
   throw new Error(msg);
 }
@@ -680,7 +757,7 @@ filterEl.addEventListener('keydown', (e) => {
 
 document.addEventListener('keydown', (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
-  if (e.target.closest('input, textarea') || ($('#help').open && e.key !== '?')) return;
+  if (e.target.closest('input, textarea') || $('#settings').open || ($('#help').open && e.key !== '?')) return;
   if (document.body.classList.contains('landing')) return;
 
   switch (e.key) {
@@ -736,6 +813,21 @@ document.addEventListener('keyup', (e) => {
 window.addEventListener('blur', () => { glide.dir = 0; });
 $('#help').addEventListener('click', (e) => { if (e.target.id === 'help') e.target.close(); });
 
+// Token settings for the web version (the extension has its own options page).
+document.querySelectorAll('.settings-btn').forEach((b) => b.addEventListener('click', () => {
+  $('#token').value = store.get('token', '');
+  $('#settings').returnValue = '';
+  $('#settings').showModal();
+}));
+$('#settings').addEventListener('close', () => {
+  if ($('#settings').returnValue !== 'save') return;
+  const token = $('#token').value.trim();
+  if (token === store.get('token', '')) return;
+  if (token) store.set('token', token);
+  else try { localStorage.removeItem('token'); } catch {}
+  location.reload();
+});
+
 window.addEventListener('hashchange', () => sync());
 
 // ---------- start ----------
@@ -743,6 +835,8 @@ function showLanding() {
   document.body.classList.add('landing');
   $('#landing').hidden = false;
   document.title = 'Reader';
+  if (!IS_EXT) $('#landing-hint').textContent = `Or replace github.com with ${location.host} in any GitHub URL.`;
+  renderRecent();
   $('#open-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const target = parseRepoInput($('#repo-input').value);
@@ -754,17 +848,26 @@ function showLanding() {
 async function init() {
   applyPrefs();
   const params = new URLSearchParams(location.search);
-  const target = params.get('repo') && parseRepoInput(params.get('repo'));
+  if (!IS_EXT) {
+    document.body.classList.add('web');
+    navigator.serviceWorker?.register('/sw.js').catch(() => {});
+    // Installed as an app, a GitHub link shared to it arrives as /?url=…&text=…
+    const shared = [params.get('url'), params.get('text')].join(' ').match(/https?:\/\/(?:www\.)?github\.com\/\S+/i);
+    const sharedTarget = shared && parseRepoInput(shared[0]);
+    if (sharedTarget) { location.replace(readerHref(sharedTarget)); return; }
+  }
+  const target = IS_EXT ? params.get('repo') && parseRepoInput(params.get('repo')) : webTarget();
   if (!target) { showLanding(); return; }
 
   [state.owner, state.repo] = target.repo.split('/');
-  state.ref = params.get('ref') || 'HEAD';
+  state.ref = target.ref || params.get('ref') || 'HEAD';
   if (window.innerWidth < NARROW) document.body.classList.add('side-hidden');
   panes[1].el.hidden = true;
 
-  try { state.token = (await chrome.storage.local.get('token')).token || ''; } catch {}
+  state.token = await loadToken();
 
   $('#repo-name').textContent = `${state.owner}/${state.repo}` + (state.ref !== 'HEAD' ? ` @ ${state.ref}` : '');
+  $('#repo-name').href = IS_EXT ? 'reader.html' : '/';
   panes[0].crumb.textContent = `${state.owner}/${state.repo}`;
   panes[0].doc.replaceChildren(notice('Loading file list…'));
 
@@ -775,6 +878,7 @@ async function init() {
     return;
   }
   renderTree();
+  rememberRepo();
   sync({ restoreScroll: true });
 }
 
