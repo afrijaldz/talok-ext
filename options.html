@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>GitHub Reader — Options</title>
+  <style>
+    body { font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 16px; min-width: 360px; }
+    label { display: block; font-weight: 600; margin-bottom: 4px; }
+    input { width: 100%; box-sizing: border-box; padding: 6px 8px; font: inherit; }
+    p { color: #666; margin: 6px 0 12px; }
+    #status { color: #1a7f37; margin-left: 8px; }
+  </style>
+</head>
+<body>
+  <label for="token">GitHub token (optional)</label>
+  <input id="token" type="password" placeholder="github_pat_…" autocomplete="off">
+  <p>Needed for private repos, or when you hit the 60 requests/hour limit for anonymous access.
+     A fine-grained token with <em>Contents: read</em> permission is enough. Stored locally in this browser.</p>
+  <button id="save">Save</button><span id="status"></span>
+  <script src="options.js"></script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reader</title>
+  <link rel="stylesheet" href="reader.css">
+</head>
+<body>
+  <aside id="sidebar">
+    <input id="filter" type="search" placeholder="Search files  /" autocomplete="off" spellcheck="false">
+    <nav id="tree"></nav>
+    <div id="repo-name"></div>
+  </aside>
+
+  <main id="main"></main>
+
+  <template id="pane-template">
+    <section class="pane">
+      <div class="progress"></div>
+      <div class="pane-body">
+        <div class="crumb"><span class="crumb-text"></span><button class="close" title="Close pane (s)">×</button></div>
+        <article class="doc"></article>
+        <nav class="pager"></nav>
+      </div>
+    </section>
+  </template>
+
+  <section id="landing" hidden>
+    <form id="open-form">
+      <h1>Reader</h1>
+      <input id="repo-input" placeholder="https://github.com/owner/repo or owner/repo" autocomplete="off" spellcheck="false" autofocus>
+      <p>Or open a repo on github.com, then click the extension icon / press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>.</p>
+    </form>
+  </section>
+
+  <dialog id="help">
+    <h2>Shortcuts</h2>
+    <dl>
+      <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Previous / next file</dd>
+      <dt><kbd>s</kbd></dt><dd>Open / close side-by-side split</dd>
+      <dt><kbd>1</kbd> <kbd>2</kbd></dt><dd>Focus left / right pane</dd>
+      <dt><kbd>Shift</kbd>+click</dt><dd>Open file / link in the other pane</dd>
+      <dt><kbd>b</kbd></dt><dd>Hide / show file list</dd>
+      <dt><kbd>/</kbd></dt><dd>Search files</dd>
+      <dt><kbd>+</kbd> <kbd>−</kbd></dt><dd>Font size</dd>
+      <dt><kbd>t</kbd></dt><dd>Theme: auto / light / dark</dd>
+      <dt><kbd>g</kbd></dt><dd>Open this file on GitHub</dd>
+      <dt><kbd>?</kbd></dt><dd>This help</dd>
+    </dl>
+  </dialog>
+
+  <div id="toast" role="status"></div>
+
+  <script src="vendor/marked.min.js"></script>
+  <script src="vendor/purify.min.js"></script>
+  <script src="vendor/highlight.min.js"></script>
+  <script src="vendor/solidity.min.js"></script>
+  <script src="vendor/yul.min.js"></script>
+  <script src="reader.js"></script>
+</body>
+</html>
