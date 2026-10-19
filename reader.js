@@ -590,8 +590,48 @@ function updateProgress(pane) {
   const el = pane.el;
   const max = el.scrollHeight - el.clientHeight;
   const ratio = max > 0 ? Math.min(1, el.scrollTop / max) : 1;
-  pane.progress.style.width = (ratio * 100) + '%';
-  if (ratio > 0.9 && MD_EXT.test(pane.current || '')) markDone(pane.current);
+  pane.progress.style.transform = `scaleX(${ratio})`;
+  if (ratio > 0.9 && pane.doneFor !== pane.current && MD_EXT.test(pane.current || '')) {
+    pane.doneFor = pane.current;
+    markDone(pane.current);
+  }
+}
+
+// ---------- keyboard scrolling ----------
+// The browser's own ↑/↓ scrolling moves in 40px steps at the key-repeat rate, which stutters.
+// Instead, holding a key glides the active pane at a steady speed and releasing eases it out.
+const GLIDE_SPEED = 700; // px/s
+const GLIDE_ACCEL = 8000; // px/s²
+const glide = { dir: 0, v: 0, y: 0, last: 0, el: null, raf: 0 };
+
+function startGlide(dir) {
+  const el = panes[state.active].el;
+  glide.dir = dir;
+  if (glide.raf && glide.el === el) return;
+  cancelAnimationFrame(glide.raf);
+  Object.assign(glide, { el, v: 0, y: el.scrollTop, last: performance.now() });
+  glide.raf = requestAnimationFrame(glideFrame);
+}
+
+function glideFrame(t) {
+  const el = glide.el;
+  const dt = Math.min(0.05, (t - glide.last) / 1000);
+  glide.last = t;
+  // Something else moved the pane (trackpad, anchor link): continue from there.
+  if (Math.abs(el.scrollTop - glide.y) > 2) glide.y = el.scrollTop;
+
+  const target = glide.dir * GLIDE_SPEED;
+  const step = GLIDE_ACCEL * dt * (glide.dir ? 1 : 3);
+  glide.v = glide.v < target ? Math.min(target, glide.v + step) : Math.max(target, glide.v - step);
+
+  const max = el.scrollHeight - el.clientHeight;
+  glide.y = Math.max(0, Math.min(max, glide.y + glide.v * dt));
+  el.scrollTop = glide.y;
+
+  const atEdge = (glide.v < 0 && glide.y === 0) || (glide.v > 0 && glide.y === max);
+  if ((!glide.dir && !glide.v) || (atEdge && !glide.dir)) { glide.raf = 0; glide.v = 0; return; }
+  if (atEdge) glide.v = 0;
+  glide.raf = requestAnimationFrame(glideFrame);
 }
 
 // ---------- events ----------
@@ -646,6 +686,10 @@ document.addEventListener('keydown', (e) => {
   switch (e.key) {
     case 'ArrowLeft': go(-1); break;
     case 'ArrowRight': go(1); break;
+    case 'ArrowUp': case 'ArrowDown':
+      e.preventDefault();
+      if (!e.repeat) startGlide(e.key === 'ArrowDown' ? 1 : -1);
+      break;
     case 'b': case '\\': document.body.classList.toggle('side-hidden'); break;
     case 's':
       if (isSplit()) closePane(1);
@@ -686,6 +730,10 @@ document.addEventListener('keydown', (e) => {
     default: return;
   }
 });
+document.addEventListener('keyup', (e) => {
+  if ((e.key === 'ArrowDown' && glide.dir === 1) || (e.key === 'ArrowUp' && glide.dir === -1)) glide.dir = 0;
+});
+window.addEventListener('blur', () => { glide.dir = 0; });
 $('#help').addEventListener('click', (e) => { if (e.target.id === 'help') e.target.close(); });
 
 window.addEventListener('hashchange', () => sync());
