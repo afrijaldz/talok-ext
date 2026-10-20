@@ -5,7 +5,10 @@
   "assets": {
     "directory": "./dist",
     // /owner/repo/... has no file of its own: serve index.html and let the reader route it.
-    "not_found_handling": "single-page-application"
+    "not_found_handling": "single-page-application",
+    // Serve /token.html as is: a redirect to /token would make the service worker cache the
+    // guide as the app shell.
+    "html_handling": "none"
   },
   "routes": [{ "pattern": "reader.afrijal.dev", "custom_domain": true }]
 }
