@@ -743,6 +743,9 @@ treeEl.addEventListener('click', (e) => {
   clearFilter();
 });
 
+$('#side-toggle').addEventListener('click', () => document.body.classList.remove('side-hidden'));
+$('#scrim').addEventListener('click', () => document.body.classList.add('side-hidden'));
+
 filterEl.addEventListener('input', runFilter);
 filterEl.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') { clearFilter(); filterEl.blur(); }
