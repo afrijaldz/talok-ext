@@ -265,6 +265,7 @@ kbd {
 }
 #settings input:focus { border-color: var(--accent); }
 #settings p { color: var(--muted); font-size: 13px; }
+#settings a { color: var(--accent); }
 /* Save comes first in the markup so Enter saves; shown on the right. */
 #settings .actions { display: flex; flex-direction: row-reverse; justify-content: flex-start; gap: 8px; }
 #settings button {

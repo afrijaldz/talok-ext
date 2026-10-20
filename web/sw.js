@@ -3,7 +3,7 @@
 const APP = 'app-__VERSION__';
 const GITHUB = 'github';
 const SHELL = [
-  '/', '/reader.js', '/reader.css', '/site.webmanifest', '/icon.svg',
+  '/', '/reader.js', '/reader.css', '/token.html', '/site.webmanifest', '/icon.svg',
   '/vendor/marked.min.js', '/vendor/purify.min.js', '/vendor/highlight.min.js',
   '/vendor/solidity.min.js', '/vendor/yul.min.js',
 ];
@@ -37,8 +37,8 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
-  // Every page (/owner/repo...) is the same index.html.
-  if (req.mode === 'navigate') e.respondWith(networkFirst(req, APP, '/'));
+  // Every page (/owner/repo...) is the same index.html, except the token guide.
+  if (req.mode === 'navigate' && url.pathname !== '/token.html') e.respondWith(networkFirst(req, APP, '/'));
   else if (url.origin === location.origin) e.respondWith(caches.match(req).then((r) => r || fetch(req)));
   else if (GITHUB_HOSTS.has(url.hostname)) e.respondWith(networkFirst(req, GITHUB));
 });

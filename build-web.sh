@@ -4,7 +4,7 @@ set -e
 cd "$(dirname "$0")"
 rm -rf dist
 mkdir dist
-cp -R reader.js reader.css vendor web/icons web/icon.svg web/site.webmanifest dist/
+cp -R reader.js reader.css token.html vendor web/icons web/icon.svg web/site.webmanifest dist/
 # Pages are served from /owner/repo, so assets need root-relative paths. The web-only <head> tags
 # (manifest, icons, theme color) are added here so the extension's reader.html stays as it is.
 sed -e 's#href="reader.css"#href="/reader.css"#' -e 's#src="\([a-z/.]*\.js\)"#src="/\1"#' \

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create a GitHub token — Reader</title>
+  <style>
+    :root {
+      --bg: #fbfaf7; --fg: #26292e; --muted: #737880; --line: #e6e2d8;
+      --box-bg: #f4f2ec; --accent: #1f5fbf; --code-bg: #f1eee6;
+      color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #17181b; --fg: #d9d7d1; --muted: #8b9098; --line: #2a2c31;
+        --box-bg: #1c1d21; --accent: #82aaff; --code-bg: #202227;
+        color-scheme: dark;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 40px 16px 64px; background: var(--bg); color: var(--fg);
+      font: 17px/1.65 Charter, "Bitstream Charter", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    }
+    main { max-width: 680px; margin: 0 auto; }
+    h1, h2 { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; line-height: 1.25; }
+    h1 { font-size: 28px; margin: 0 0 8px; }
+    h2 { font-size: 19px; margin: 36px 0 8px; }
+    a { color: var(--accent); }
+    code { font: .88em ui-monospace, "SF Mono", Menlo, Consolas, monospace; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+    ol { padding-left: 1.4em; }
+    li { margin: 10px 0; }
+    li ul { margin: 6px 0; }
+    li ul li { margin: 4px 0; }
+    .lead { color: var(--muted); margin: 0 0 24px; }
+    .button {
+      display: inline-block; padding: 8px 14px; border-radius: 6px; text-decoration: none;
+      color: #fff; background: var(--accent);
+      font: 600 15px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    }
+    @media (prefers-color-scheme: dark) { .button { color: #17181b; } }
+    .summary {
+      margin: 12px 0; padding: 12px 16px; border: 1px solid var(--line); border-radius: 8px;
+      background: var(--box-bg); font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    }
+    .summary dt { font-weight: 600; }
+    .summary dd { margin: 0 0 10px; color: var(--muted); }
+    .summary dd:last-child { margin-bottom: 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Create a GitHub token</h1>
+    <p class="lead">Reader works without a token for public repos. You need one to read private repos,
+      or when you hit GitHub's limit of 60 requests per hour for anonymous access.</p>
+
+    <p><a class="button" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Open the token page on GitHub</a></p>
+    <p>Or go there by hand: profile picture → <strong>Settings</strong> → <strong>Developer settings</strong>
+      → <strong>Personal access tokens</strong> → <strong>Fine-grained tokens</strong> → <strong>Generate new token</strong>.</p>
+
+    <h2>Fill in the form</h2>
+    <ol>
+      <li><strong>Token name</strong>: anything you will recognise later, for example <code>Reader</code>.</li>
+      <li><strong>Expiration</strong>: pick how long the token stays valid. When it expires, Reader shows
+        "GitHub rejected the token" and you create a new one.</li>
+      <li><strong>Resource owner</strong>: your own account. If the repos you want to read belong to an
+        organization, pick that organization instead. Some organizations must approve the token first;
+        until an admin approves it, it can only read public repos.</li>
+      <li><strong>Repository access</strong>:
+        <ul>
+          <li><strong>All repositories</strong> — every repo the resource owner has, including ones created later.</li>
+          <li><strong>Only select repositories</strong> — only the repos you pick in the list.</li>
+        </ul>
+      </li>
+      <li><strong>Permissions</strong>: under <strong>Repository permissions</strong>, set
+        <strong>Contents</strong> to <strong>Read-only</strong>. GitHub adds <strong>Metadata: Read-only</strong>
+        by itself. Leave everything else, including the account permissions, at <strong>No access</strong>.</li>
+    </ol>
+
+    <p>Before you generate the token, the overview at the bottom of the form should look like this
+      (with <strong>All repositories</strong>):</p>
+    <dl class="summary">
+      <dt>Repository access</dt>
+      <dd>This token has access to all repositories owned by you.</dd>
+      <dt>User permissions</dt>
+      <dd>This token does not have any user permissions.</dd>
+      <dt>Repository permissions</dt>
+      <dd>Read access to code and metadata</dd>
+    </dl>
+    <p>Reader only reads files, so it never needs more than this.</p>
+
+    <h2>Copy the token</h2>
+    <p>Click <strong>Generate token</strong>, then copy the token. It starts with <code>github_pat_</code>.
+      GitHub shows it only once; if you lose it, regenerate it from the same page.</p>
+
+    <h2>Paste it into Reader</h2>
+    <ul>
+      <li><strong>Chrome extension</strong>: right-click the Reader icon → <strong>Options</strong>, paste the token, click <strong>Save</strong>.</li>
+      <li><strong>Web version</strong>: click <strong>Token</strong> at the bottom of the file list (or
+        <strong>Add a GitHub token</strong> on the start page), paste the token, click <strong>Save</strong>.</li>
+    </ul>
+    <p>The token stays in this browser only and is sent only to <code>api.github.com</code>.
+      To remove it, clear the field and save. To revoke it everywhere, delete it on the
+      <a href="https://github.com/settings/personal-access-tokens" target="_blank" rel="noopener">fine-grained tokens page</a>.</p>
+  </main>
+</body>
+</html>

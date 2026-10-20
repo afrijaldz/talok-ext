@@ -87,7 +87,8 @@ is 60 requests/hour.
 
 For private repos or a higher limit, create a
 [fine-grained token](https://github.com/settings/personal-access-tokens/new) with
-**Contents: read-only** permission and paste it into the extension options (right-click the icon → **Options**).
+**Contents: read-only** permission (step-by-step guide: [`token.html`](token.html), linked from the
+extension options and the web Token dialog) and paste it into the extension options (right-click the icon → **Options**).
 The token is only stored in your browser's `chrome.storage.local`.
 
 ## Layout
@@ -97,6 +98,7 @@ manifest.json        Manifest V3
 background.js        Icon click → turn the github.com URL into a reader URL
 reader.html/css/js   Reader page (file list, rendering, split view, routing)
 options.html/js      Token settings
+token.html           Guide to creating a fine-grained GitHub token
 build-web.sh         Builds the web version into dist/
 web/                 Web-only files: service worker, web app manifest, icons
 wrangler.jsonc       Cloudflare deploy config for the web version
