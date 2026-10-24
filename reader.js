@@ -562,6 +562,7 @@ function renderMarkdown(pane, source, path) {
 
 function decorateCode(code) {
   const lang = [...code.classList].find((c) => c.startsWith('language-'))?.slice(9);
+  if (lang === 'mermaid') { renderMermaid(code); return; }
   if (lang && hljs.getLanguage(lang)) hljs.highlightElement(code);
   const btn = document.createElement('button');
   btn.className = 'copy';
@@ -570,6 +571,16 @@ function decorateCode(code) {
     navigator.clipboard.writeText(code.textContent).then(() => toast('Copied'));
   });
   code.parentElement.append(btn);
+}
+
+// Mermaid diagrams are drawn by Pele. mount() shows parse errors inside the box itself.
+function renderMermaid(code) {
+  const box = document.createElement('div');
+  box.className = 'mermaid';
+  code.parentElement.replaceWith(box);
+  pele.mount(box, code.textContent, {
+    sanitize: (svg) => DOMPurify.sanitize(svg, { USE_PROFILES: { svg: true }, RETURN_DOM_FRAGMENT: true }),
+  });
 }
 
 // ---------- views ----------

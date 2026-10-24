@@ -5,7 +5,7 @@ const GITHUB = 'github';
 const SHELL = [
   '/', '/reader.js', '/reader.css', '/token.html', '/site.webmanifest', '/icon.svg',
   '/vendor/marked.min.js', '/vendor/purify.min.js', '/vendor/highlight.min.js',
-  '/vendor/solidity.min.js', '/vendor/yul.min.js',
+  '/vendor/solidity.min.js', '/vendor/yul.min.js', '/vendor/pele.global.js',
 ];
 const GITHUB_HOSTS = new Set(['api.github.com', 'raw.githubusercontent.com']);
 

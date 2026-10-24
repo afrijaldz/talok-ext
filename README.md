@@ -17,6 +17,8 @@ repos full of study notes or docs that are meant to be read in order.
   files you've read. Click the repo name at the bottom of the file list to get back there.
 - **Links between files** in markdown stay inside the reader, including links to headings.
 - **Syntax highlighting** for common languages plus Solidity and Yul.
+- **Mermaid diagrams** (` ```mermaid ` blocks) drawn with [Pele](https://github.com/obsidianmd/pele), in the
+  reader's light/dark colors.
 - YAML frontmatter is hidden, dotfiles (`.github`, `.gitignore`) are not listed.
 - Private repos are supported through an optional GitHub token.
 

@@ -184,6 +184,14 @@ body.split .pane-body { padding: 44px 36px 120px; }
 }
 .doc pre:hover .copy { opacity: 1; }
 
+/* mermaid diagrams (Pele), colored from the reader theme */
+.doc .mermaid {
+  margin: 0 0 1.1em;
+  --pele-bg: var(--bg); --pele-fg: var(--fg); --pele-muted: var(--muted); --pele-line: var(--fg);
+  --pele-surface: var(--code-bg); --pele-surface-alt: var(--hover); --pele-border: var(--line);
+  --pele-accent: var(--accent); --pele-font: var(--font-ui);
+}
+
 .doc .table-wrap { overflow-x: auto; margin-bottom: 1.1em; }
 .doc table { border-collapse: collapse; font-size: .86em; margin: 0; }
 .doc th, .doc td { border: 1px solid var(--line); padding: 6px 12px; text-align: left; vertical-align: top; }
