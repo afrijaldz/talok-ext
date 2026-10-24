@@ -104,7 +104,7 @@ token.html           Guide to creating a fine-grained GitHub token
 build-web.sh         Builds the web version into dist/
 web/                 Web-only files: service worker, web app manifest, icons
 wrangler.jsonc       Cloudflare deploy config for the web version
-vendor/              marked, DOMPurify, highlight.js, highlightjs-solidity
+vendor/              marked, DOMPurify, highlight.js, highlightjs-solidity, Pele
 ```
 
 ## Third-party
@@ -112,4 +112,5 @@ vendor/              marked, DOMPurify, highlight.js, highlightjs-solidity
 - [marked](https://github.com/markedjs/marked) 15.0.12 — MIT
 - [DOMPurify](https://github.com/cure53/DOMPurify) 3.2.6 — Apache-2.0 / MPL-2.0
 - [highlight.js](https://github.com/highlightjs/highlight.js) 11.11.1 — BSD-3-Clause
+- [Pele](https://github.com/obsidianmd/pele) 1.9.0 — MIT
 - [highlightjs-solidity](https://github.com/highlightjs/highlightjs-solidity) 2.0.6 — MIT
