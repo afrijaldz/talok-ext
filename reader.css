@@ -208,6 +208,7 @@ body.split .pane-body { padding: 44px 36px 120px; }
 .hljs-keyword, .hljs-selector-tag, .hljs-built_in, .hljs-type, .hljs-literal { color: var(--hl-keyword); }
 .hljs-string, .hljs-regexp, .hljs-addition { color: var(--hl-string); }
 .hljs-number, .hljs-symbol, .hljs-variable.constant_ { color: var(--hl-number); }
+.hljs-variable, .hljs-template-variable, .hljs-subst { color: var(--hl-number); }
 .hljs-comment, .hljs-quote, .hljs-meta { color: var(--hl-comment); font-style: italic; }
 .hljs-title, .hljs-section, .hljs-name { color: var(--hl-title); }
 .hljs-attr, .hljs-attribute, .hljs-property, .hljs-params { color: var(--hl-attr); }

@@ -560,6 +560,17 @@ function renderMarkdown(pane, source, path) {
   doc.querySelectorAll('pre > code').forEach(decorateCode);
 }
 
+// highlight.js leaves command names and flags in bash blocks uncolored. Color the command at the
+// start of a line or after | ; & (except shell keywords and builtins) and every -x / --flag.
+// This runs before the first highlight, while the bash grammar is not compiled yet.
+const bash = hljs.getLanguage('bash');
+const shellWords = [...bash.keywords.keyword, ...bash.keywords.built_in]
+  .map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+bash.contains.push(
+  { scope: 'title', match: new RegExp('(?<=^[ \\t]*|[|;&][ \\t]*)(?!(?:' + shellWords.join('|') + ')\\b)[A-Za-z_./][\\w./-]*') },
+  { scope: 'attr', match: /(?<=[ \t])--?[A-Za-z][\w-]*/ },
+);
+
 function decorateCode(code) {
   const lang = [...code.classList].find((c) => c.startsWith('language-'))?.slice(9);
   if (lang === 'mermaid') { renderMermaid(code); return; }
